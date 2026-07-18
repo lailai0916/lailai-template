@@ -9,4 +9,5 @@
 ## 自查 · Checklist
 
 - [ ] 本地 check / 构建通过 · builds and checks pass locally
-- [ ] 相应文档 / `.claude/` 已同步 · docs / `.claude/` updated if behavior changed
+- [ ] 测试已覆盖改动 · tests cover the change where applicable
+- [ ] 文档与 Agent 指令已同步 · docs and Agent instructions are up to date

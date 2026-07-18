@@ -30,7 +30,8 @@ hygiene.
 `.agents/rules/` and `.agents/skills/` are portable sources, and `.claude/` contains only
 constant-size compatibility pointers plus Claude-specific settings.
 
-📮 **GitHub templates** — bilingual issue forms and a PR checklist.
+📮 **GitHub templates** — bilingual issue forms, a PR checklist, and a private
+vulnerability-reporting policy.
 
 🧹 **Sensible defaults** — `.editorconfig`, `.gitattributes`, `.gitignore`, MIT `LICENSE`.
 
@@ -59,7 +60,8 @@ CLAUDE.md                         # Claude compatibility import → AGENTS.md
 └── settings.json                # Claude-specific permissions / hooks
 .github/
 ├── ISSUE_TEMPLATE/              # bug_report · feature_request
-└── PULL_REQUEST_TEMPLATE.md     # PR checklist
+├── PULL_REQUEST_TEMPLATE.md     # PR checklist
+└── SECURITY.md                  # private vulnerability reporting
 ```
 
 The template copies no style rules of its own. lailai-skill is the single source, pulled in

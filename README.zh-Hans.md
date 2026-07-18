@@ -28,7 +28,7 @@ lailai-skill 赛博分身，以及常用的编辑器 / git 卫生文件。
 🗂️ **多 Agent 脚手架** —— `AGENTS.md` 是项目规则真源，`.agents/rules/` 与
 `.agents/skills/` 保存通用内容，`.claude/` 只保留常数个兼容入口与 Claude 专属设置。
 
-📮 **GitHub 模板** —— 中英双语的 issue 表单与 PR 清单。
+📮 **GitHub 模板** —— 中英双语的 issue 表单、PR 清单与私密漏洞报告策略。
 
 🧹 **合理默认** —— `.editorconfig`、`.gitattributes`、`.gitignore`、MIT `LICENSE`。
 
@@ -57,7 +57,8 @@ CLAUDE.md                         # Claude 兼容导入 → AGENTS.md
 └── settings.json                # Claude 专属权限 / hooks
 .github/
 ├── ISSUE_TEMPLATE/              # bug_report · feature_request
-└── PULL_REQUEST_TEMPLATE.md     # PR 清单
+├── PULL_REQUEST_TEMPLATE.md     # PR 清单
+└── SECURITY.md                  # 私密漏洞报告策略
 ```
 
 模板不复制任何自己的风格规则。lailai-skill 是单一来源，以 submodule 引入、由
