@@ -17,10 +17,12 @@
   </p>
 </div>
 
-通用 GitHub 起步模板。用它新建的仓库开箱自带跨 Agent 通用配置、以 submodule 引入的
-lailai-skill 赛博分身，以及常用的编辑器 / git 卫生文件。
+## 项目简介
 
-## 特性
+通用 GitHub 起步模板。用它新建的仓库开箱自带跨 Agent 通用配置、以 submodule 引入的
+lailai-skill 赛博分身，以及常用的 Git 基础文件。
+
+## 项目特性
 
 🧠 **内置 lailai-skill** —— 跨项目风格分身以 submodule 引入 `.agents/skills/`，
 `AGENTS.md` 直接 defer 过去，而非复制规则。
@@ -30,7 +32,7 @@ lailai-skill 赛博分身，以及常用的编辑器 / git 卫生文件。
 
 📮 **GitHub 模板** —— 中英双语的 issue 表单、PR 清单与私密漏洞报告策略。
 
-🧹 **合理默认** —— `.editorconfig`、`.gitattributes`、`.gitignore`、MIT `LICENSE`。
+🧹 **合理默认** —— `.gitattributes`、`.gitignore` 与 MIT `LICENSE`。
 
 ## 快速开始
 
@@ -43,28 +45,36 @@ git submodule update --init
 # 为你自己的项目重写 README.md / README.zh-Hans.md
 ```
 
-## 结构
+## 项目结构
 
-```text
-AGENTS.md                         # 项目规则唯一真源
-CLAUDE.md                         # Claude 兼容导入 → AGENTS.md
-.agents/
-├── skills/lailai-skill/         # submodule，指向 lailai0916/lailai-skill
-└── rules/example.md.template    # 项目专属规则的骨架
-.claude/
-├── skills -> ../.agents/skills  # 单个兼容入口
-├── rules -> ../.agents/rules    # 单个兼容入口
-└── settings.json                # Claude 专属权限 / hooks
-.github/
-├── ISSUE_TEMPLATE/              # bug_report · feature_request
-├── PULL_REQUEST_TEMPLATE.md     # PR 清单
-└── SECURITY.md                  # 私密漏洞报告策略
+```bash
+lailai-template/
+├── AGENTS.md                       # 项目规则唯一真源
+├── CLAUDE.md                       # Claude 兼容导入 → AGENTS.md
+├── .agents/
+│   ├── skills/lailai-skill/        # submodule，指向 lailai0916/lailai-skill
+│   └── rules/example.md.template   # 项目专属规则的骨架
+├── .claude/
+│   ├── skills -> ../.agents/skills # 单个兼容入口
+│   ├── rules -> ../.agents/rules   # 单个兼容入口
+│   └── settings.json               # Claude 专属权限 / hooks
+├── .github/
+│   ├── ISSUE_TEMPLATE/             # bug_report · feature_request
+│   ├── PULL_REQUEST_TEMPLATE.md    # PR 清单
+│   └── SECURITY.md                 # 私密漏洞报告策略
+├── docs/                           # 项目文档
+├── .gitattributes                  # 统一换行符
+├── .gitignore                      # 忽略本地文件
+├── .gitmodules                     # lailai-skill 子模块映射
+├── LICENSE                         # 代码许可协议
+├── README.md                       # 英文文档
+└── README.zh-Hans.md               # 简体中文文档
 ```
 
 模板不复制任何自己的风格规则。lailai-skill 是单一来源，以 submodule 引入、由
 `AGENTS.md` defer 过去；各仓库的 `.agents/rules/` 只留自己的项目专属层。
 Runtime 兼容层不会按 rule 或 skill 逐项复制。
 
-## 许可
+## 许可协议
 
-采用 [MIT License](LICENSE)。
+本项目代码采用 [MIT 许可协议](LICENSE)。
