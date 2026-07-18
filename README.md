@@ -17,13 +17,18 @@
   </p>
 </div>
 
-A general-purpose GitHub starter template. New repos come pre-wired with `.claude/` config, the lailai-skill cyber-twin as a submodule, and the usual editor / git hygiene.
+A general-purpose GitHub starter template. New repos come pre-wired with runtime-neutral
+Agent configuration, the lailai-skill cyber-twin as a submodule, and the usual editor / git
+hygiene.
 
 ## Features
 
-🧠 **lailai-skill built in** — the cross-project style twin ships as a submodule; `CLAUDE.md` defers to it instead of copying rules.
+🧠 **lailai-skill built in** — the cross-project style twin ships under
+`.agents/skills/` as a submodule; `AGENTS.md` defers to it instead of copying rules.
 
-🗂️ **`.claude/` scaffold** — shared `settings.json`, a project `CLAUDE.md` skeleton, and a path-scoped rule template.
+🗂️ **Multi-Agent scaffold** — `AGENTS.md` is the canonical project guide,
+`.agents/rules/` and `.agents/skills/` are portable sources, and `.claude/` contains only
+constant-size compatibility pointers plus Claude-specific settings.
 
 📮 **GitHub templates** — bilingual issue forms and a PR checklist.
 
@@ -43,17 +48,23 @@ git submodule update --init
 ## Structure
 
 ```text
-.claude/
+AGENTS.md                         # canonical project instructions
+CLAUDE.md                         # Claude compatibility import → AGENTS.md
+.agents/
 ├── skills/lailai-skill/         # submodule → lailai0916/lailai-skill
-├── rules/example.md.template    # skeleton for a project-scoped rule
-├── settings.json                # shared permissions / hooks
-└── CLAUDE.md                    # project guide; style defers to lailai-skill
+└── rules/example.md.template    # skeleton for a project-scoped rule
+.claude/
+├── skills -> ../.agents/skills  # one compatibility pointer
+├── rules -> ../.agents/rules    # one compatibility pointer
+└── settings.json                # Claude-specific permissions / hooks
 .github/
 ├── ISSUE_TEMPLATE/              # bug_report · feature_request
 └── PULL_REQUEST_TEMPLATE.md     # PR checklist
 ```
 
-The template copies no style rules of its own. lailai-skill is the single source, pulled in as a submodule and deferred to from `CLAUDE.md`; each repo's `.claude/rules/` holds only its own project-specific layer.
+The template copies no style rules of its own. lailai-skill is the single source, pulled in
+as a submodule and deferred to from `AGENTS.md`; each repo's `.agents/rules/` holds only its
+own project-specific layer. Runtime adapters never copy rules or skills per item.
 
 ## License
 
