@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>lailai-template</h1>
+  <h1>Lailai Template</h1>
   <p>English | <a href="README.zh-Hans.md">简体中文</a></p>
   <p>
     <img
@@ -51,26 +51,11 @@ git submodule update --init
 
 ```bash
 lailai-template/
-├── AGENTS.md                       # canonical project instructions
-├── CLAUDE.md                       # Claude compatibility import → AGENTS.md
-├── .agents/
-│   ├── skills/lailai-skill/        # submodule → lailai0916/lailai-skill
-│   └── rules/example.md.template   # skeleton for a project-scoped rule
-├── .claude/
-│   ├── skills -> ../.agents/skills # one compatibility pointer
-│   ├── rules -> ../.agents/rules   # one compatibility pointer
-│   └── settings.json               # Claude-specific permissions / hooks
-├── .github/
-│   ├── ISSUE_TEMPLATE/             # bug_report · feature_request
-│   ├── PULL_REQUEST_TEMPLATE.md    # PR checklist
-│   └── SECURITY.md                 # private vulnerability reporting
-├── docs/                           # project documentation
-├── .gitattributes                  # normalized line endings
-├── .gitignore                      # ignored local files
-├── .gitmodules                     # lailai-skill submodule mapping
-├── LICENSE                         # code license
-├── README.md                       # English documentation
-└── README.zh-Hans.md               # Simplified Chinese documentation
+├── .github/                        # GitHub collaboration templates
+│   ├── ISSUE_TEMPLATE/             # Bilingual issue forms
+│   ├── PULL_REQUEST_TEMPLATE.md    # Pull request checklist
+│   └── SECURITY.md                 # Private vulnerability reporting
+└── docs/                           # Project documentation placeholder
 ```
 
 The template copies no style rules of its own. lailai-skill is the single source, pulled in
@@ -79,4 +64,4 @@ own project-specific layer. Runtime adapters never copy rules or skills per item
 
 ## License
 
-This project's code is licensed under [MIT License](LICENSE).
+This project's code is licensed under [MIT License](https://github.com/lailai0916/tools/blob/main/LICENSE).

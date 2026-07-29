@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>lailai-template</h1>
+  <h1>Lailai Template</h1>
   <p><a href="README.md">English</a> | 简体中文</p>
   <p>
     <img
@@ -49,26 +49,11 @@ git submodule update --init
 
 ```bash
 lailai-template/
-├── AGENTS.md                       # 项目规则唯一真源
-├── CLAUDE.md                       # Claude 兼容导入 → AGENTS.md
-├── .agents/
-│   ├── skills/lailai-skill/        # submodule，指向 lailai0916/lailai-skill
-│   └── rules/example.md.template   # 项目专属规则的骨架
-├── .claude/
-│   ├── skills -> ../.agents/skills # 单个兼容入口
-│   ├── rules -> ../.agents/rules   # 单个兼容入口
-│   └── settings.json               # Claude 专属权限 / hooks
-├── .github/
-│   ├── ISSUE_TEMPLATE/             # bug_report · feature_request
-│   ├── PULL_REQUEST_TEMPLATE.md    # PR 清单
+├── .github/                        # GitHub 协作模板
+│   ├── ISSUE_TEMPLATE/             # 双语 Issue 表单
+│   ├── PULL_REQUEST_TEMPLATE.md    # PR 检查清单
 │   └── SECURITY.md                 # 私密漏洞报告策略
-├── docs/                           # 项目文档
-├── .gitattributes                  # 统一换行符
-├── .gitignore                      # 忽略本地文件
-├── .gitmodules                     # lailai-skill 子模块映射
-├── LICENSE                         # 代码许可协议
-├── README.md                       # 英文文档
-└── README.zh-Hans.md               # 简体中文文档
+└── docs/                           # 项目文档占位目录
 ```
 
 模板不复制任何自己的风格规则。lailai-skill 是单一来源，以 submodule 引入、由
@@ -77,4 +62,4 @@ Runtime 兼容层不会按 rule 或 skill 逐项复制。
 
 ## 许可协议
 
-本项目代码采用 [MIT 许可协议](LICENSE)。
+本项目代码采用 [MIT 许可协议](https://github.com/lailai0916/tools/blob/main/LICENSE)。
