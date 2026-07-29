@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>Lailai Template</h1>
+  <h1>lailai-template</h1>
   <p><a href="README.md">English</a> | 简体中文</p>
   <p>
     <img
@@ -28,7 +28,7 @@ lailai-skill 赛博分身，以及常用的 Git 基础文件。
 `AGENTS.md` 直接 defer 过去，而非复制规则。
 
 🗂️ **多 Agent 脚手架** —— `AGENTS.md` 是项目规则真源，`.agents/rules/` 与
-`.agents/skills/` 保存通用内容，`.claude/` 只保留常数个兼容入口与 Claude 专属设置。
+`.agents/skills/` 保存通用内容。`.claude/` 只保留常数个兼容入口与 Claude 专属设置。
 
 📮 **GitHub 模板** —— 中英双语的 issue 表单、PR 清单与私密漏洞报告策略。
 
