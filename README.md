@@ -1,6 +1,6 @@
 <div align="center">
   <h1>lailai-template</h1>
-  <p>English | <a href="README.zh-Hans.md">简体中文</a></p>
+  <p><strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a></p>
   <p>
     <img
       src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square"
