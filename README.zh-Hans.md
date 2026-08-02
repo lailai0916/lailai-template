@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>lailai-template</h1>
+  <h1>lailai's Template</h1>
   <p><a href="README.md">English</a> · <strong>简体中文</strong></p>
   <p>
     <img
