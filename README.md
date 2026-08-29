@@ -1,66 +1,58 @@
 <div align="center">
-  <h1>lailai's Template</h1>
+  <h1>lailai-template</h1>
   <p><strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a></p>
   <p>
-    <img
-      src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square"
-    />
-    <img
-      src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square"
-    />
-    <img
-      src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square"
-    />
-    <img
-      src="https://img.shields.io/github/license/lailai0916/lailai-template?style=flat-square"
-    />
+    <img src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/github/license/lailai0916/lailai-template?style=flat-square" />
   </p>
 </div>
 
 ## Project Introduction
 
-A general-purpose GitHub starter template. New repos come pre-wired with runtime-neutral
-Agent configuration, the lailai-skill cyber-twin as a submodule, and the usual Git hygiene.
+A ready-to-use GitHub repository template with bilingual documentation, runtime-neutral Agent
+guidance, collaboration forms, and strict initialization checkpoints.
 
 ## Project Features
 
-🧠 **lailai-skill built in** — the cross-project style twin ships under
-`.agents/skills/` as a submodule; `AGENTS.md` defers to it instead of copying rules.
+📄 **Bilingual README** — Centered project identity, language navigation, real badges, mirrored
+English and Simplified-Chinese content, and a deterministic structure tree.
 
-🗂️ **Multi-Agent scaffold** — `AGENTS.md` is the canonical project guide,
-`.agents/rules/` and `.agents/skills/` are portable sources, and `.claude/` contains only
-constant-size compatibility pointers plus Claude-specific settings.
+🗺️ **Agent Project Map** — One canonical `AGENTS.md`, scoped local rules, and constant-size
+runtime adapters without duplicated instructions.
 
-📮 **GitHub templates** — bilingual issue forms, a PR checklist, and a private
-vulnerability-reporting policy.
+📮 **GitHub Collaboration** — Bilingual issue forms, a pull-request checklist, and private
+vulnerability-reporting guidance.
 
-🧹 **Sensible defaults** — `.gitattributes`, `.gitignore`, and an MIT `LICENSE`.
+🧹 **Repository Defaults** — Git attributes, ignore rules, an MIT license, and explicit cleanup
+checks for placeholders and GitHub About metadata.
 
 ## Getting Started
 
-Click **Use this template**, then:
+Click **Use this template**, then complete the initialization in order:
 
 ```bash
-# Initialize the lailai-skill submodule
-git submodule update --init
+# Replace all template placeholders and old repository paths.
+rg -n 'TODO|<owner>|<repo>|One paragraph|Replace with' .
 
-# Rewrite README.md / README.zh-Hans.md for your own project
+# Confirm that no template identity remains accidentally.
+rg -n 'lailai-template|lailai0916/lailai-template' . --glob '!README*'
+
+# Run the new project's documented check gate.
 ```
+
+Rewrite `README.md` and `README.zh-Hans.md` as exact mirrors. Replace badge paths, complete
+`AGENTS.md`, remove unused templates, then set the GitHub About description, homepage, and
+$3\sim8$ accurate lowercase topics. These are completion requirements, not optional cleanup.
 
 ## Project Structure
 
 ```bash
 lailai-template/
-├── .github/                        # GitHub collaboration templates
-│   ├── ISSUE_TEMPLATE/             # Bilingual issue forms
-│   ├── PULL_REQUEST_TEMPLATE.md    # Pull request checklist
-│   └── SECURITY.md                 # Private vulnerability reporting
-└── docs/                           # Project documentation placeholder
+├── .github/                    # Collaboration and security forms
+└── docs/                       # Project documentation placeholder
 ```
-
-The template copies no style rules of its own. lailai-skill is the single source, pulled in
-as a submodule and deferred to from `AGENTS.md`; each repo's `.agents/rules/` holds only its
-own project-specific layer. Runtime adapters never copy rules or skills per item.
 
 ## License
 

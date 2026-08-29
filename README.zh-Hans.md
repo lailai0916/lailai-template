@@ -1,64 +1,57 @@
 <div align="center">
-  <h1>lailai's Template</h1>
+  <h1>lailai-template</h1>
   <p><a href="README.md">English</a> · <strong>简体中文</strong></p>
   <p>
-    <img
-      src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square"
-    />
-    <img
-      src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square"
-    />
-    <img
-      src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square"
-    />
-    <img
-      src="https://img.shields.io/github/license/lailai0916/lailai-template?style=flat-square"
-    />
+    <img src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/github/license/lailai0916/lailai-template?style=flat-square" />
   </p>
 </div>
 
 ## 项目简介
 
-通用 GitHub 起步模板。用它新建的仓库开箱自带跨 Agent 通用配置、以 submodule 引入的
-lailai-skill 赛博分身，以及常用的 Git 基础文件。
+开箱即用的 GitHub 仓库模板，内含双语文档、runtime-neutral Agent 项目说明、协作表单与
+严格的初始化检查点。
 
 ## 项目特性
 
-🧠 **内置 lailai-skill** —— 跨项目风格分身以 submodule 引入 `.agents/skills/`，
-`AGENTS.md` 直接 defer 过去，而非复制规则。
+📄 **双语 README** —— 居中的项目标识、语言导航与真实徽章。中英文内容完整对等，
+项目结构树确定性对齐。
 
-🗂️ **多 Agent 脚手架** —— `AGENTS.md` 是项目规则真源，`.agents/rules/` 与
-`.agents/skills/` 保存通用内容。`.claude/` 只保留常数个兼容入口与 Claude 专属设置。
+🗺️ **Agent 项目地图** —— 以 `AGENTS.md` 为单一真源，局部规则按路径拆分，runtime 只保留
+常数大小的兼容入口。
 
-📮 **GitHub 模板** —— 中英双语的 issue 表单、PR 清单与私密漏洞报告策略。
+📮 **GitHub 协作** —— 中英双语 Issue 表单、PR 自查清单与私密漏洞报告说明。
 
-🧹 **合理默认** —— `.gitattributes`、`.gitignore` 与 MIT `LICENSE`。
+🧹 **仓库默认项** —— Git 属性、忽略规则、MIT 许可协议，以及占位内容与 GitHub About
+元数据的显式清理检查。
 
 ## 快速开始
 
-点 **Use this template**，然后：
+点击 **Use this template**，再按顺序完成初始化：
 
 ```bash
-# 初始化 lailai-skill 子模块
-git submodule update --init
+# 替换全部模板占位符与旧仓库路径。
+rg -n 'TODO|<owner>|<repo>|One paragraph|Replace with' .
 
-# 为你自己的项目重写 README.md / README.zh-Hans.md
+# 确认没有误留模板身份。
+rg -n 'lailai-template|lailai0916/lailai-template' . --glob '!README*'
+
+# 运行新项目在 AGENTS.md 中记录的检查命令。
 ```
+
+将 `README.md` 与 `README.zh-Hans.md` 重写为严格镜像，替换徽章路径，补完
+`AGENTS.md`，删除无用模板，再设置 GitHub About 的 description、homepage 与
+$3\sim8$ 个准确的小写 topics。这些是完成条件，不是可选善后。
 
 ## 项目结构
 
 ```bash
 lailai-template/
-├── .github/                        # GitHub 协作模板
-│   ├── ISSUE_TEMPLATE/             # 双语 Issue 表单
-│   ├── PULL_REQUEST_TEMPLATE.md    # PR 检查清单
-│   └── SECURITY.md                 # 私密漏洞报告策略
-└── docs/                           # 项目文档占位目录
+├── .github/                    # 协作与安全表单
+└── docs/                       # 项目文档占位目录
 ```
-
-模板不复制任何自己的风格规则。lailai-skill 是单一来源，以 submodule 引入、由
-`AGENTS.md` defer 过去；各仓库的 `.agents/rules/` 只留自己的项目专属层。
-Runtime 兼容层不会按 rule 或 skill 逐项复制。
 
 ## 许可协议
 
