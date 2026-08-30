@@ -76,9 +76,12 @@ def tracked_text() -> list[tuple[str, str]]:
         if not raw:
             continue
         rel = raw.decode()
+        path = ROOT / rel
+        if path.is_symlink() or not path.is_file():
+            continue
         try:
-            files.append((rel, (ROOT / rel).read_text(encoding="utf-8")))
-        except (UnicodeDecodeError, IsADirectoryError):
+            files.append((rel, path.read_text(encoding="utf-8")))
+        except UnicodeDecodeError:
             pass
     return files
 
