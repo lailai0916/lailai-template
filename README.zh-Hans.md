@@ -2,6 +2,7 @@
   <h1>lailai-template</h1>
   <p><a href="README.md">English</a> · <strong>简体中文</strong></p>
   <p>
+    <img src="https://img.shields.io/github/actions/workflow/status/lailai0916/lailai-template/ci.yml?branch=main&style=flat-square" />
     <img src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square" />
     <img src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square" />
     <img src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square" />
@@ -27,6 +28,9 @@
 🧹 **仓库默认项** —— Git 属性、忽略规则、MIT 许可协议，以及占位内容与 GitHub About
 元数据的显式清理检查。
 
+🧪 **初始化检查** —— 无依赖检查仓库身份、README 徽章与 Agent 入口。
+同时拦截未替换的占位内容和生成式署名。
+
 ## 快速开始
 
 点击 **Use this template**，再按顺序完成初始化：
@@ -37,6 +41,9 @@ rg -n 'TODO|<owner>|<repo>|One paragraph|Replace with' .
 
 # 确认没有误留模板身份。
 rg -n 'lailai-template|lailai0916/lailai-template' . --glob '!README*'
+
+# 验证初始化结果与仓库身份。
+python3 scripts/check_repository.py
 
 # 运行新项目在 AGENTS.md 中记录的检查命令。
 ```
@@ -50,7 +57,8 @@ $3\sim8$ 个准确的小写 topics。这些是完成条件，不是可选善后�
 ```bash
 lailai-template/
 ├── .github/                    # 协作与安全表单
-└── docs/                       # 项目文档占位目录
+├── docs/                       # 项目文档占位目录
+└── scripts/                    # 初始化完整性检查
 ```
 
 ## 许可协议

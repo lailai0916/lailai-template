@@ -2,6 +2,7 @@
   <h1>lailai-template</h1>
   <p><strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a></p>
   <p>
+    <img src="https://img.shields.io/github/actions/workflow/status/lailai0916/lailai-template/ci.yml?branch=main&style=flat-square" />
     <img src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square" />
     <img src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square" />
     <img src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square" />
@@ -28,6 +29,9 @@ vulnerability-reporting guidance.
 🧹 **Repository Defaults** — Git attributes, ignore rules, an MIT license, and explicit cleanup
 checks for placeholders and GitHub About metadata.
 
+🧪 **Initialization Check** — A dependency-free gate verifies repository identity, README badges,
+and Agent entrypoints. It also blocks unresolved placeholders and forbidden generated attribution.
+
 ## Getting Started
 
 Click **Use this template**, then complete the initialization in order:
@@ -38,6 +42,9 @@ rg -n 'TODO|<owner>|<repo>|One paragraph|Replace with' .
 
 # Confirm that no template identity remains accidentally.
 rg -n 'lailai-template|lailai0916/lailai-template' . --glob '!README*'
+
+# Validate initialization and repository identity.
+python3 scripts/check_repository.py
 
 # Run the new project's documented check gate.
 ```
@@ -51,7 +58,8 @@ $3\sim8$ accurate lowercase topics. These are completion requirements, not optio
 ```bash
 lailai-template/
 ├── .github/                    # Collaboration and security forms
-└── docs/                       # Project documentation placeholder
+├── docs/                       # Project documentation placeholder
+└── scripts/                    # Initialization integrity check
 ```
 
 ## License
