@@ -1,33 +1,20 @@
-<!--
-  How to write a project-specific rule.
-
-  Copy this file to `<name>.md` (drop the .template suffix), then register it in
-  the "Rules index" table of ../../AGENTS.md. Agents read a rule when a file
-  matching its `paths` glob is touched — so keep each rule scoped and small.
-
-  A project rule holds only durable behavior specific to THIS repository.
-  Do not copy broad personal, organizational, framework, or runtime manuals
-  into it. Link to an external canonical source when one already exists.
-
-  Delete this comment block in the real file.
--->
-
 ---
-
 paths:
-
-- 'src/\*_/_.{ts,tsx}'
-- 'src/\*_/_.css'
-
+  - 'src/**/*.{ts,tsx}'
+  - 'src/**/*.css'
 ---
 
 # <Area> rules
 
-One or two sentences on what this rule governs and when it applies.
+<!--
+Rename this file to <name>.md and register it in the project's AGENTS.md.
+Replace the example paths and prose with durable local behavior, then remove
+this note. Leave broad repository standards at their canonical upstream URL.
+-->
 
-> This file governs only the repository-specific layer below. External general rules remain in their canonical source.
+One or two sentences on what this rule governs and when it applies.
 
 ## <Section>
 
-- Concrete, checkable conventions. Prefer examples over prose.
-- State the _why_ when it's non-obvious, so the rule survives refactors.
+- State concrete, checkable conventions for this project's matching paths.
+- Explain non-obvious constraints so the rule remains useful during refactoring.
