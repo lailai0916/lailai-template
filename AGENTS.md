@@ -1,53 +1,42 @@
 # Repository instructions
 
-Runtime-neutral guidance for AI coding agents in this repository. This file is the always-loaded
-project map; path-specific detail belongs in `.agents/rules/*.md`.
+This repository owns the shared repository standards, initialization guide, examples, and checker.
+Read [SETUP.md](SETUP.md) before changing any of them. Change the standard, working examples,
+and affected checks together; keep English and Simplified-Chinese READMEs aligned.
 
-## Template initialization
+## Generated projects
 
-This repository is a ready-to-use template, not a source of broad personal or organization-wide
-policy. After creating a repository from it, complete these items before feature work:
+If the current repository is a project created from this template, follow the inherited setup
+guide, replace this project map with actual local commands and rules, and remove the inherited
+guide only after acceptance. The template source permanently retains it. Future repository and
+README maintenance uses the canonical standard:
 
-1. Replace the project description, commands, rules index, and conventions below.
-2. Rewrite both READMEs, including the centered title, language navigation, real badges,
-   introduction, features, copyable setup, aligned structure tree, and license section.
-3. Replace every badge owner/repository path and remove every placeholder or unused template.
-4. Set the GitHub About description, homepage, and $3\sim8$ accurate lowercase topics.
-5. Add only durable project-specific rules under `.agents/rules/`; delete the example if unused.
-6. Run `python3 scripts/check_repository.py`, then the project's actual check gate recorded below.
+[Repository standards](https://github.com/lailai0916/lailai-template/blob/main/SETUP.md).
 
-Internal Agent guidance in the generated repository has priority for that repository's local
-behavior. Keep runtime-specific files as constant-size compatibility adapters, not duplicate
-instruction sources.
+Keep that link in the generated project's `AGENTS.md`. Store only project-specific differences
+locally; do not copy the standard or maintain another version of its checker.
 
 ## Project
 
-<!-- One paragraph: what this is, stack, supported runtime versions, and deployment target. -->
+`lailai-template` is a GitHub template with a dependency-free Python 3.10+ validator and Prettier
+for repository text. It owns no personal profile, specialized solution workflow, or application.
 
 ## Commands
 
 ```bash
-python3 scripts/check_repository.py # Validate template initialization and repository identity.
-# Replace with commands contributors actually run. Delete unused lines.
-# npm run dev
-# npm run build
-# npm run check
+python3 scripts/check_repository.py --root .
+python3 -m unittest discover -s tests -v
+npm ci --ignore-scripts
+npm run format:check
 ```
 
-## Rules index
-
-<!-- Add one row per active .agents/rules/*.md; delete the table if none exist. -->
-
-| Rule | Scope | Covers |
-| --- | --- | --- |
-| <!-- .agents/rules/example.md --> | <!-- src/** --> | <!-- durable local behavior --> |
+Use `--github` for read-only verification of the live repository metadata. The ordinary local
+check does not claim that remote state is correct. Generated projects record their own runtime,
+test, build, and formatting commands here and call the external checker at a reviewed revision.
 
 ## Conventions
 
-- Verify changes with the project's documented check gate before committing.
-- Keep `scripts/check_repository.py` in the initial CI gate; extend the workflow with project checks.
-- Preserve unrelated user changes and keep each change coherent.
-- Update `AGENTS.md` and matching path rules in the same change that invalidates them.
-
-`AGENTS.md` is canonical. `CLAUDE.md` is only a compatibility import; `.claude/` may hold
-runtime-specific settings but never a second copy of these rules.
+- The only canonical instruction file is `AGENTS.md`; `CLAUDE.md` is a compatibility import.
+- `.agents/rules/example.md.template` illustrates a scoped local rule; it is not an active rule.
+- Standards, examples, and validation stay here. No downstream personal or project policy is required.
+- Preserve unrelated work. Verify changes before committing and update affected documentation.

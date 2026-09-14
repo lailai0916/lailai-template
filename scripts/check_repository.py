@@ -1,148 +1,371 @@
 #!/usr/bin/env python3
+"""Validate repository standards at the target, never at the checker's checkout."""
 
-import os
+import argparse
+import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Optional
+from urllib.parse import parse_qs, unquote, urlparse
 
 
-ROOT = Path(__file__).resolve().parents[1]
-TEMPLATE_REPOSITORY = "lailai0916/lailai-template"
+TEMPLATE = "lailai0916/lailai-template"
+STANDARD_URL = f"https://github.com/{TEMPLATE}/blob/main/SETUP.md"
+MIT_URL = "https://github.com/lailai0916/tools/blob/main/LICENSE"
+TREE_ENTRY = re.compile(r"^(?P<prefix>(?:│   |    )*)(?:├── |└── )(?P<name>.+)$")
+KEBAB = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+COMMIT = re.compile(r"^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([^)]+\))?!?: .+")
+HEADINGS = {"## Project Structure", "## 项目结构"}
+SIGNATURES = ("Co-" + "Authored-By", "Generated " + "with", "Generated " + "by", "AI-" + "generated")
 
 
-def repository_slug() -> Optional[str]:
-    slug = os.environ.get("GITHUB_REPOSITORY") or os.environ.get("REPOSITORY_SLUG")
-    if slug:
-        return slug.removesuffix(".git").strip("/")
-
-    result = subprocess.run(
-        ["git", "config", "--get", "remote.origin.url"],
-        cwd=ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
+def git(root, *args):
+    return subprocess.run(
+        ["git", "-C", str(root), *args], capture_output=True, text=True, check=False
     )
-    remote = result.stdout.strip()
-    match = re.search(r"github\.com(?::|/)([^/]+/[^/]+?)(?:\.git)?$", remote)
+
+
+def repository_slug(root):
+    result = git(root, "config", "--get", "remote.origin.url")
+    match = re.search(r"github\.com(?::|/)([^/]+/[^/]+?)(?:\.git)?$", result.stdout.strip())
     return match.group(1) if match else None
 
 
-def check_readme(path: Path, slug: str, chinese: bool) -> list[str]:
-    errors = []
-    text = path.read_text(encoding="utf-8")
-    language_nav = (
-        '<p><a href="README.md">English</a> · <strong>简体中文</strong></p>'
-        if chinese
-        else '<p><strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a></p>'
-    )
-    required = (
-        '<div align="center">',
-        language_nav,
-        f"github/actions/workflow/status/{slug}/ci.yml?branch=main",
-        f"github/last-commit/{slug}",
-        f"github/languages/top/{slug}",
-        f"github/repo-size/{slug}",
-        f"github/license/{slug}",
-    )
-    for marker in required:
-        if marker not in text:
-            errors.append(f"{path.name}: missing {marker}")
+def read_text(path, errors):
+    try:
+        raw = path.read_bytes()
+        text = raw.decode("utf-8")
+    except (OSError, UnicodeError) as exc:
+        errors.append(f"{path.name}: file-unreadable: {exc}")
+        return None
+    if text.startswith("\ufeff") or "\r" in text or not text.endswith("\n"):
+        errors.append(f"{path.name}: file-format: use UTF-8 without BOM, LF and a final newline")
+    return text
 
-    heading = "## 项目结构" if chinese else "## Project Structure"
-    if heading not in text:
-        errors.append(f"{path.name}: missing {heading}")
-        return errors
-    section = text.split(heading, 1)[1]
-    match = re.search(r"```bash\n(.*?)\n```", section, re.DOTALL)
-    if not match:
-        errors.append(f"{path.name}: missing bash structure tree")
-        return errors
-    for line in match.group(1).splitlines():
-        if "#" in line and line.index("#") != 32:
-            errors.append(f"{path.name}: structure comment is not at index 32: {line}")
+
+def check_commit(text):
+    errors = []
+    first = text.strip().splitlines()[0] if text.strip() else ""
+    if not first.startswith(("Merge ", "Revert ")) and not COMMIT.fullmatch(first):
+        errors.append("commit-conventional: use type(scope): description")
+    for marker in SIGNATURES:
+        if marker.casefold() in text.casefold():
+            errors.append("commit-signature: remove automated authorship or promotional signatures")
     return errors
 
 
-def tracked_text() -> list[tuple[str, str]]:
-    result = subprocess.run(
-        ["git", "ls-files", "-z"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-    )
-    files = []
-    for raw in result.stdout.split(b"\0"):
-        if not raw:
-            continue
-        rel = raw.decode()
-        path = ROOT / rel
-        if path.is_symlink() or not path.is_file():
-            continue
-        try:
-            files.append((rel, path.read_text(encoding="utf-8")))
-        except UnicodeDecodeError:
-            pass
-    return files
-
-
-def main() -> int:
+def check_path(path):
     errors = []
-    required_files = (
-        ".github/workflows/ci.yml",
-        "AGENTS.md",
-        "CLAUDE.md",
-        "LICENSE",
-        "README.md",
-        "README.zh-Hans.md",
-        "scripts/check_repository.py",
-    )
-    for rel in required_files:
-        if not (ROOT / rel).exists():
-            errors.append(f"missing required file: {rel}")
+    if not path.isascii():
+        errors.append(f"{path}: path-filename-ascii: use English ASCII names")
+    if path.endswith(".command") and not KEBAB.fullmatch(Path(path).stem):
+        errors.append(f"{path}: command-filename: use a kebab-case launcher name")
+    return errors
 
-    if (ROOT / "CLAUDE.md").read_text(encoding="utf-8").strip() != "@AGENTS.md":
-        errors.append("CLAUDE.md must contain only @AGENTS.md")
 
-    slug = repository_slug()
-    if not slug:
-        errors.append("cannot determine owner/repository; set REPOSITORY_SLUG")
+def check_links(path, text):
+    errors = []
+    for target in re.findall(r"\]\(([^\s)]+)\)", text):
+        if re.match(r"[a-z]+:|#|/", target):
+            continue
+        local = unquote(target.split("#", 1)[0])
+        if local and not (path.parent / local).exists():
+            errors.append(f"{path.name}: broken-link: {target}")
+    return errors
+
+
+def check_tree(block, slug):
+    errors, entries, groups, parents = [], [], {}, []
+    lines = block.splitlines()
+    if not lines or lines[0] != slug.split("/")[-1] + "/":
+        errors.append("project-tree-root: use the actual repository name")
+    for raw in lines[1:]:
+        if not raw.strip():
+            continue
+        left = raw.split("#", 1)[0].rstrip()
+        match = TREE_ENTRY.fullmatch(left)
+        if not match:
+            errors.append("project-tree-entry: invalid tree entry")
+            continue
+        name = match["name"]
+        level = len(match["prefix"]) // 4
+        if level > len(parents):
+            errors.append("project-tree-depth: missing parent directory")
+            continue
+        parents = parents[:level]
+        clean = name.split(" -> ", 1)[0].rstrip("/")
+        base = clean.rsplit("/", 1)[-1]
+        if base.startswith(("README", "LICENSE")) or base in {
+            ".git", ".gitignore", ".gitattributes", ".gitmodules",
+            ".agents", ".claude", "AGENTS.md", "CLAUDE.md",
+        }:
+            errors.append("project-tree-common: omit common repository metadata")
+        if not clean.isascii():
+            errors.append("project-tree-filename: use English ASCII names")
+        is_dir = name.split(" -> ", 1)[0].endswith("/")
+        groups.setdefault(tuple(parents), []).append((not is_dir, name.casefold()))
+        if is_dir:
+            parents.append(clean)
+        entries.append((raw, len(left)))
+        if "#" not in raw or not raw.split("#", 1)[1].strip():
+            errors.append("project-tree-comment: every entry needs a useful comment")
+    if not entries:
+        errors.append("project-tree-empty: include project-specific entries")
     else:
-        errors.extend(check_readme(ROOT / "README.md", slug, False))
-        errors.extend(check_readme(ROOT / "README.zh-Hans.md", slug, True))
+        width = max(36, max(length for _, length in entries) + 1)
+        for raw, _ in entries:
+            if "#" in raw and raw.index("#") != width:
+                errors.append(f"project-tree-align: expected {width} characters before #, got {raw.index('#')}")
+    if any(group != sorted(group) for group in groups.values()):
+        errors.append("project-tree-order: directories first, each group sorted by name")
+    return errors
 
-        if slug == TEMPLATE_REPOSITORY:
-            if not (ROOT / ".agents/rules/example.md.template").exists():
-                errors.append("missing template rule example")
-        else:
-            for rel in ("README.md", "README.zh-Hans.md", "AGENTS.md"):
-                if "lailai-template" in (ROOT / rel).read_text(encoding="utf-8"):
-                    errors.append(f"{rel}: template identity was not replaced")
-            if (ROOT / ".agents/rules/example.md.template").exists():
-                errors.append("remove or rename .agents/rules/example.md.template")
-            agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
-            for marker in ("<!-- One paragraph", "<!-- Add one row"):
-                if marker in agents:
-                    errors.append(f"AGENTS.md: unresolved placeholder: {marker}")
 
-    forbidden = (
-        "Co-" + "Authored-By",
-        "Generated " + "with",
-        "Generated " + "by",
-        "AI-" + "generated",
+def check_readme(path, slug, display_name=None, root=None):
+    errors = []
+    text = read_text(path, errors)
+    if text is None:
+        return errors
+    errors.extend(check_links(path, text))
+    chinese = path.name == "README.zh-Hans.md"
+    head = text.split("\n## ", 1)[0]
+    if not re.search(r'<div\s+align="center">', head):
+        errors.append("readme-centered-header: use a centered header")
+    title = re.search(r"<h1>([^<]+)</h1>", head)
+    if not title:
+        errors.append("project-title: missing display name")
+    else:
+        value = title[1].strip()
+        if display_name and value != display_name:
+            errors.append("project-title: does not match the established display name")
+        if KEBAB.fullmatch(value) and value not in {display_name, TEMPLATE.split("/")[-1]}:
+            errors.append("project-title-case: use a display name, not a lowercase repository slug")
+    navigation = [
+        re.sub(r"\s+", " ", match).strip()
+        for match in re.findall(r"<p>(.*?)</p>", head, re.S)
+        if "English" in match and "简体中文" in match
+    ]
+    expected = (
+        '<a href="README.md">English</a> · <strong>简体中文</strong>'
+        if chinese else '<strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a>'
     )
-    for rel, text in tracked_text():
-        for marker in forbidden:
-            if marker.lower() in text.lower():
-                errors.append(f"{rel}: forbidden attribution: {marker}")
+    if not navigation or navigation[0] != expected:
+        errors.append("readme-language-nav: link other languages, bold current language and separate with ·")
+    sources = re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', head)
+    sources += re.findall(r"!\[[^\]]*\]\(([^)]+)\)", head)
+    parsed = [urlparse(source.replace("&amp;", "&")) for source in sources]
+    for kind in ("last-commit", "languages/top", "repo-size", "license"):
+        if not any(url.netloc == "img.shields.io" and url.path == f"/github/{kind}/{slug}" for url in parsed):
+            errors.append(f"readme-required-badges: missing actual {kind} badge for {slug}")
+    if root:
+        workflows = list((root / ".github/workflows").glob("*.yml"))
+        workflows += list((root / ".github/workflows").glob("*.yaml"))
+        ci_badges = [url for url in parsed if url.path.startswith("/github/actions/workflow/status/")]
+        valid = [url for url in ci_badges if url.netloc == "img.shields.io" and url.path.startswith(f"/github/actions/workflow/status/{slug}/")]
+        if workflows and not valid:
+            errors.append("readme-ci-badge: missing actual workflow badge")
+        for url in ci_badges:
+            workflow = url.path.rsplit("/", 1)[-1]
+            if url not in valid or not (root / ".github/workflows" / workflow).is_file():
+                errors.append("readme-ci-badge: workflow or repository does not exist locally")
+            if not parse_qs(url.query).get("branch"):
+                errors.append("readme-ci-badge: specify the actual branch")
+        package = root / "package.json"
+        if package.exists():
+            try:
+                has_prettier = "prettier" in json.loads(package.read_text()).get("devDependencies", {})
+            except (ValueError, AttributeError):
+                has_prettier = False
+            if has_prettier and not any("/badge/code_style-prettier-" in url.path for url in parsed):
+                errors.append("readme-formatter-badge: show the configured formatter")
+    lines = text.splitlines()
+    outside, fence = [], None
+    for index, line in enumerate(lines):
+        mark = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if mark:
+            if fence is None:
+                fence = mark[1]
+            elif line.strip() == fence:
+                fence = None
+        elif fence is None:
+            outside.append((index, line))
+    structure = [(index, line) for index, line in outside if line in HEADINGS]
+    if len(structure) != 1:
+        errors.append("project-tree-missing: include one Project Structure section")
+    else:
+        start = structure[0][0] + 1
+        while start < len(lines) and not lines[start].strip():
+            start += 1
+        if start >= len(lines) or lines[start] != "```bash":
+            errors.append("project-tree-language: tree must use a bash fence")
+        else:
+            end = start + 1
+            while end < len(lines) and lines[end] != "```":
+                end += 1
+            if end == len(lines):
+                errors.append("project-tree-fence: unclosed tree fence")
+            else:
+                errors.extend(check_tree("\n".join(lines[start + 1:end]), slug))
+    sections = [(index, line) for index, line in outside if line.startswith("## ")]
+    license_heading = "## 许可协议" if chinese else "## License"
+    if not sections or sections[-1][1] != license_heading:
+        errors.append("license-section: finish with a license section")
+    else:
+        license_text = "\n".join(lines[sections[-1][0] + 1:])
+        if "MIT" in license_text:
+            exact = f"本项目代码采用 [MIT 许可协议]({MIT_URL})。" if chinese else f"This project's code is licensed under [MIT License]({MIT_URL})."
+            if MIT_URL not in license_text:
+                errors.append("license-link: use the canonical MIT link")
+            if exact not in license_text:
+                errors.append("license-wording: use the standard MIT sentence")
+    return [error if error.startswith(path.name + ":") else f"{path.name}: {error}" for error in errors]
 
-    if errors:
-        for error in errors:
-            print(f"ERROR {error}")
-        return 1
 
-    print(f"Repository template checks passed for {slug}.")
-    return 0
+def check_repository(root, slug, initializing=False, readme_only=False, display_name=None):
+    errors = []
+    if not re.fullmatch(r"[A-Za-z0-9-]+/[A-Za-z0-9_.-]+", slug):
+        return ["repository-name: expected a valid owner/repository"]
+    if not readme_only and not KEBAB.fullmatch(slug.split("/")[-1]):
+        errors.append("repository-name: new repositories use lowercase kebab-case")
+    for name in ("README.md", "README.zh-Hans.md"):
+        errors.extend(check_readme(root / name, slug, display_name, root))
+    if readme_only:
+        return errors
+    required = ("AGENTS.md", "LICENSE", ".gitignore", ".gitattributes", "package.json", "package-lock.json", ".prettierrc.json")
+    texts = {name: read_text(root / name, errors) for name in required}
+    agents = texts["AGENTS.md"] or ""
+    errors.extend(check_links(root / "AGENTS.md", agents))
+    if STANDARD_URL not in agents:
+        errors.append("AGENTS.md: standards-route: retain the canonical standards link")
+    for marker in ("<!-- One paragraph", "<!-- Add one row", "REPLACE_PROJECT"):
+        if marker in agents:
+            errors.append(f"AGENTS.md: unresolved-placeholder: {marker}")
+    adapter = root / "CLAUDE.md"
+    if adapter.exists() and adapter.read_text().strip() != "@AGENTS.md":
+        errors.append("CLAUDE.md: adapter: use only @AGENTS.md")
+    if slug == TEMPLATE:
+        if not (root / "SETUP.md").is_file():
+            errors.append("setup-source: never remove the source guide")
+    else:
+        if not initializing and (root / "SETUP.md").exists():
+            errors.append("setup-cleanup: remove the inherited guide after acceptance")
+        if not initializing and (root / ".agents/rules/example.md.template").exists():
+            errors.append("setup-cleanup: remove the unused rule example")
+        if not initializing and (root / "docs/.gitkeep").exists():
+            errors.append("setup-cleanup: remove the unused documentation placeholder")
+        if not initializing:
+            source = Path(__file__).resolve().parents[1]
+            for rel in ("scripts/check_repository.py", "tests/test_repository.py", "tests/scenarios.md", ".github/workflows/ci.yml"):
+                target = root / rel
+                if target.is_file() and target.read_bytes() == (source / rel).read_bytes():
+                    errors.append(f"{rel}: setup-cleanup: replace inherited CI or remove unchanged template-only tooling")
+        for name in ("README.md", "README.zh-Hans.md", "AGENTS.md"):
+            path = root / name
+            if path.is_file():
+                for script in re.findall(r"^(?:python3?|node) (scripts/[\w./-]+\.(?:py|js|mjs))\b", path.read_text(), re.M):
+                    if not (root / script).is_file():
+                        errors.append(f"{name}: stale-command: local script {script} does not exist")
+    try:
+        package = json.loads(texts["package.json"] or "{}")
+        config = json.loads(texts[".prettierrc.json"] or "{}")
+        if package.get("name") != slug.split("/")[-1]:
+            errors.append("package-identity: replace the template package name")
+        if "prettier" not in package.get("devDependencies", {}):
+            errors.append("formatter-dependency: declare Prettier")
+        scripts = package.get("scripts", {})
+        for name, flag in (("format", "--write"), ("format:check", "--check")):
+            command = scripts.get(name, "")
+            if "prettier" not in command or flag not in command:
+                errors.append(f"formatter-script: missing {name}")
+        if any(config.get(key) != value for key, value in {
+            "printWidth": 100, "singleQuote": True, "trailingComma": "es5"
+        }.items()):
+            errors.append("formatter-config: use the template defaults")
+    except (ValueError, AttributeError, TypeError):
+        errors.append("formatter-config: invalid package or formatter JSON")
+    return errors
+
+
+def check_github(root, slug):
+    result = subprocess.run(
+        ["gh", "repo", "view", slug, "--json", "nameWithOwner,description,repositoryTopics,homepageUrl,defaultBranchRef"],
+        capture_output=True, text=True, check=False,
+    )
+    if result.returncode:
+        return ["github-unverified: " + result.stderr.strip()]
+    try:
+        data = json.loads(result.stdout)
+        topics = [item["name"] for item in data.get("repositoryTopics") or []]
+        branch = data["defaultBranchRef"]["name"]
+    except (ValueError, KeyError, TypeError):
+        return ["github-unverified: invalid metadata response"]
+    errors = []
+    if data.get("nameWithOwner", "").casefold() != slug.casefold():
+        errors.append("github-identity: repository mismatch")
+    description = data.get("description", "")
+    if not description.strip() or re.search(r"[一-鿿]", description):
+        errors.append("github-description: provide an English description")
+    if not 3 <= len(topics) <= 8 or len(topics) != len(set(topics)) or any(not KEBAB.fullmatch(t) for t in topics):
+        errors.append("github-topics: require 3–8 distinct lowercase kebab-case topics")
+    homepage = data.get("homepageUrl") or ""
+    if homepage and not re.match(r"^https?://[^/\s]+", homepage):
+        errors.append("github-homepage: invalid homepage URL")
+    for name in ("README.md", "README.zh-Hans.md"):
+        path = root / name
+        if not path.is_file():
+            continue
+        for query in re.findall(r"github/actions/workflow/status/[^\s\"<>]+\?([^\s\"<>]+)", path.read_text()):
+            if parse_qs(query.replace("&amp;", "&")).get("branch", [None])[0] != branch:
+                errors.append(f"{name}: github-branch: badge differs from actual default branch")
+    identity = root / "repository.json"
+    if identity.exists():
+        try:
+            expected = json.loads(identity.read_text())
+            for key, actual in (("description", description), ("topics", topics)):
+                if key in expected and (sorted(expected[key]) if key == "topics" else expected[key]) != (sorted(actual) if key == "topics" else actual):
+                    errors.append(f"repository.json: github-{key}: local and live metadata differ")
+        except (ValueError, TypeError):
+            errors.append("repository.json: invalid metadata")
+    return errors
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", type=Path, default=Path.cwd())
+    parser.add_argument("--slug")
+    parser.add_argument("--display-name")
+    parser.add_argument("--initializing", action="store_true")
+    parser.add_argument("--readme-only", action="store_true")
+    parser.add_argument("--github", action="store_true")
+    parser.add_argument("--paths", nargs="+", help="Only validate the listed changed path names")
+    parser.add_argument("--commit", type=Path)
+    args = parser.parse_args(argv)
+    root = args.root.resolve()
+    if args.commit:
+        try:
+            errors = check_commit(args.commit.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError) as exc:
+            errors = [f"commit-unreadable: {exc}"]
+    elif args.paths:
+        errors = [error for path in args.paths for error in check_path(path)]
+    else:
+        slug = args.slug or repository_slug(root)
+        if not slug:
+            errors = ["repository-identity: configure origin or pass --slug owner/repository"]
+        else:
+            errors = check_repository(root, slug, args.initializing, args.readme_only, args.display_name)
+            if args.github:
+                try:
+                    errors.extend(check_github(root, slug))
+                except OSError as exc:
+                    errors.append(f"github-unverified: {exc}")
+            else:
+                print("GitHub About and default branch were not verified (use --github).")
+    for error in errors:
+        print(f"ERROR {error}")
+    if not errors:
+        print("Applicable repository checks passed; semantic and runtime acceptance remain separate.")
+    return bool(errors)
 
 
 if __name__ == "__main__":

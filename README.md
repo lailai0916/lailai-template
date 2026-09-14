@@ -6,61 +6,68 @@
     <img src="https://img.shields.io/github/last-commit/lailai0916/lailai-template?style=flat-square" />
     <img src="https://img.shields.io/github/languages/top/lailai0916/lailai-template?style=flat-square" />
     <img src="https://img.shields.io/github/repo-size/lailai0916/lailai-template?style=flat-square" />
+    <img src="https://img.shields.io/badge/code_style-prettier-ff69b4?style=flat-square" />
     <img src="https://img.shields.io/github/license/lailai0916/lailai-template?style=flat-square" />
   </p>
 </div>
 
 ## Project Introduction
 
-A ready-to-use GitHub repository template with bilingual documentation, runtime-neutral Agent
-guidance, collaboration forms, and strict initialization checkpoints.
+A ready-to-use GitHub template that keeps repository standards, setup guidance, bilingual README
+examples, and validation tools together.
 
 ## Project Features
 
-📄 **Bilingual README** — Centered project identity, language navigation, real badges, mirrored
-English and Simplified-Chinese content, and a deterministic structure tree.
+📄 **Shared Standards** — [SETUP.md](SETUP.md) owns repository naming, READMEs, GitHub About,
+engineering defaults, and acceptance requirements.
 
-🗺️ **Agent Project Map** — One canonical `AGENTS.md`, scoped local rules, and constant-size
-runtime adapters without duplicated instructions.
+🗺️ **Ongoing Maintenance** — Generated projects retain a short upstream reference after removing
+their accepted initialization guide.
 
-📮 **GitHub Collaboration** — Bilingual issue forms, a pull-request checklist, and private
-vulnerability-reporting guidance.
+🧪 **Central Validation** — The Python checker validates external projects; standards and check
+implementations are maintained only in the template.
 
-🧹 **Repository Defaults** — Git attributes, ignore rules, an MIT license, and explicit cleanup
-checks for placeholders and GitHub About metadata.
-
-🧪 **Initialization Check** — A dependency-free gate verifies repository identity, README badges,
-and Agent entrypoints. It also blocks unresolved placeholders and forbidden generated attribution.
+📮 **Working Defaults** — Bilingual documentation, collaboration forms, Git configuration,
+Prettier, and an Agent project map are ready to adapt.
 
 ## Getting Started
 
-Click **Use this template**, then complete the initialization in order:
+Click **Use this template**, read the complete [setup guide](SETUP.md), and adapt and verify the
+generated project:
 
 ```bash
-# Replace all template placeholders and old repository paths.
-rg -n 'TODO|<owner>|<repo>|One paragraph|Replace with' .
-
-# Confirm that no template identity remains accidentally.
-rg -n 'lailai-template|lailai0916/lailai-template' . --glob '!README*'
-
-# Validate initialization and repository identity.
-python3 scripts/check_repository.py
-
-# Run the new project's documented check gate.
+npm ci --ignore-scripts
+npm run format:check
+python3 scripts/check_repository.py --root . --initializing
+python3 scripts/check_repository.py --root . --initializing --github
 ```
 
-Rewrite `README.md` and `README.zh-Hans.md` as exact mirrors. Replace badge paths, complete
-`AGENTS.md`, remove unused templates, then set the GitHub About description, homepage, and
-$3\sim8$ accurate lowercase topics. These are completion requirements, not optional cleanup.
+`--github` uses GitHub CLI to verify remote metadata without modifying it. Functionality,
+translation quality, and deployment require their corresponding checks.
+
+After acceptance, remove the generated project's inherited `SETUP.md`, retain the upstream link,
+and run ongoing validation from a fixed template revision. The source template permanently keeps
+the guide and tests. Existing projects consult the same guide without copying its contents.
 
 ## Project Structure
 
 ```bash
 lailai-template/
-├── .github/                    # Collaboration and security forms
-├── docs/                       # Project documentation placeholder
-└── scripts/                    # Initialization integrity check
+├── scripts/                        # Shared repository validation
+├── tests/                          # Migration and initialization regression tests
+├── package.json                    # Formatter commands and dependencies
+└── SETUP.md                        # Repository standards and initialization guide
 ```
+
+## Validation
+
+```bash
+python3 scripts/check_repository.py --root .
+python3 -m unittest discover -s tests -v
+npm run format:check
+```
+
+[SETUP.md](SETUP.md) owns cross-repository usage, acceptance coverage, and initialization cleanup.
 
 ## License
 
