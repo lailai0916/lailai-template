@@ -136,6 +136,15 @@ class RepositoryTest(unittest.TestCase):
         self.assertEqual(checker.check_readme(self.root / "README.md", "example/csv-diff", "brand", self.root), [])
         self.assertEqual(checker.check_readme(self.root / "README.zh-Hans.md", "example/csv-diff", root=self.root), [])
 
+    def test_additional_languages_keep_the_same_navigation_rules(self):
+        good = (self.root / "README.md").read_text()
+        extended = good.replace('简体中文</a></p>', '简体中文</a> · <a href="README.fr.md">Français</a></p>')
+        self.assertTrue(any("linked translations" in e for e in self.readme(extended)))
+        (self.root / "README.fr.md").write_text("# CSV Diff\n")
+        self.assertEqual(self.readme(extended), [])
+        invalid = extended.replace('<a href="README.fr.md">Français</a>', '<strong>Français</strong>')
+        self.assertTrue(any("readme-language-nav" in e for e in self.readme(invalid)))
+
     def test_paths_and_commit_subjects(self):
         self.assertEqual(checker.check_path("tools/start.command"), [])
         self.assertTrue(checker.check_path("tools/启动.command"))

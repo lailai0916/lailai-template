@@ -145,12 +145,14 @@ def check_readme(path, slug, display_name=None, root=None):
         for match in re.findall(r"<p>(.*?)</p>", head, re.S)
         if "English" in match and "简体中文" in match
     ]
-    expected = (
-        '<a href="README.md">English</a> · <strong>简体中文</strong>'
-        if chinese else '<strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a>'
-    )
-    if not navigation or navigation[0] != expected:
+    current = '<strong>简体中文</strong>' if chinese else '<strong>English</strong>'
+    other = '<a href="README.md">English</a>' if chinese else '<a href="README.zh-Hans.md">简体中文</a>'
+    parts = navigation[0].split(" · ") if navigation else []
+    links = [re.fullmatch(r'<a href="(README(?:\.[A-Za-z][A-Za-z0-9-]*)?\.md)">[^<>]+</a>', part) for part in parts if part != current]
+    if parts.count(current) != 1 or other not in parts or not all(links) or len(set(parts)) != len(parts):
         errors.append("readme-language-nav: link other languages, bold current language and separate with ·")
+    elif any(not (path.parent / link[1]).is_file() for link in links):
+        errors.append("readme-language-nav: linked translations must exist")
     sources = re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', head)
     sources += re.findall(r"!\[[^\]]*\]\(([^)]+)\)", head)
     parsed = [urlparse(source.replace("&amp;", "&")) for source in sources]
