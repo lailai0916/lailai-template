@@ -130,6 +130,49 @@ class RepositoryTest(unittest.TestCase):
         self.assertTrue(any("project-tree-missing" in error for error in self.readme(good.replace("## Project Structure", "## Other"))))
         self.assertEqual(self.readme(good.replace("<p><strong>", "<p>\n<strong>")), [])
 
+    def test_exact_section_names_and_order(self):
+        for filename, cases in (
+            ("README.md", (("Project Introduction", "Introduction"),
+                           ("Project Features", "Features"),
+                           ("Getting Started", "Quick Start"))),
+            ("README.zh-Hans.md", (("项目简介", "简介"), ("项目特性", "特性"),
+                                   ("快速开始", "安装"))),
+        ):
+            path = self.root / filename
+            good = path.read_text()
+            for before, after in cases:
+                with self.subTest(filename=filename, heading=before):
+                    path.write_text(good.replace("## " + before, "## " + after))
+                    errors = checker.check_readme(path, "example/csv-diff", root=self.root)
+                    self.assertTrue(any("readme-section-name" in error for error in errors))
+            path.write_text(good)
+        good = (self.root / "README.md").read_text()
+        swapped = good.replace("## Project Introduction", "## TEMP").replace(
+            "## Project Features", "## Project Introduction").replace("## TEMP", "## Project Features")
+        self.assertTrue(any("readme-section-order" in error for error in self.readme(swapped)))
+        duplicate = good.replace("## Project Introduction", "## Project Introduction\n\n## Project Introduction")
+        self.assertTrue(any("readme-section-name" in error for error in self.readme(duplicate)))
+
+    def test_feature_paragraph_format(self):
+        good = (self.root / "README.md").read_text()
+        for before, after in (("📄 **Shared Standards** —", "- 📄 **Shared Standards** —"),
+                              ("📄 **Shared Standards** —", "📄 **Shared Standards** -"),
+                              ("\n\n🗺️ **Ongoing Maintenance**", "\n🗺️ **Ongoing Maintenance**")):
+            with self.subTest(after=after):
+                errors = self.readme(good.replace(before, after))
+                self.assertTrue(any("readme-feature-format" in error for error in errors))
+
+    def test_tree_excludes_agent_metadata_and_checks_paths(self):
+        for name in ("AGENTS.md", "CLAUDE.md", "GEMINI.md", ".agents/", ".codex/"):
+            with self.subTest(name=name):
+                tree = "csv-diff/\n" + ("└── " + name).ljust(36) + "# Metadata"
+                self.assertTrue(any("project-tree-common" in e for e in checker.check_tree(tree, "example/csv-diff")))
+        skill_tree = "csv-diff/\n" + "└── SKILL.md".ljust(36) + "# Product entry"
+        self.assertEqual(checker.check_tree(skill_tree, "example/csv-diff"), [])
+        good = (self.root / "README.md").read_text()
+        errors = self.readme(good.replace("└── start.py ", "└── ghost.py "))
+        self.assertTrue(any("project-tree-path" in error for error in errors))
+
     def test_explicit_brand_and_legitimate_upstream_reference(self):
         good = (self.root / "README.md").read_text().replace("<h1>CSV Diff</h1>", "<h1>brand</h1>")
         self.readme(good)
@@ -160,6 +203,13 @@ class RepositoryTest(unittest.TestCase):
                 "defaultBranchRef": {"name": "main"}, "homepageUrl": ""}
         def response(value):
             return subprocess.CompletedProcess([], 0, json.dumps(value), "")
+        with patch.object(checker.subprocess, "run", return_value=response(data)):
+            self.assertEqual(checker.check_github(self.root, "example/csv-diff"), [])
+        identity = self.root / "repository.json"
+        identity.write_text(json.dumps({"homepage": "https://example.com/csv-diff"}))
+        with patch.object(checker.subprocess, "run", return_value=response(data)):
+            self.assertTrue(any("github-homepage" in e for e in checker.check_github(self.root, "example/csv-diff")))
+        data["homepageUrl"] = "https://example.com/csv-diff"
         with patch.object(checker.subprocess, "run", return_value=response(data)):
             self.assertEqual(checker.check_github(self.root, "example/csv-diff"), [])
         data["repositoryTopics"] = []

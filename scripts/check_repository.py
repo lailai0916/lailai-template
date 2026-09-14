@@ -16,6 +16,10 @@ TREE_ENTRY = re.compile(r"^(?P<prefix>(?:│   |    )*)(?:├── |└── )
 KEBAB = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 COMMIT = re.compile(r"^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([^)]+\))?!?: .+")
 HEADINGS = {"## Project Structure", "## 项目结构"}
+CORE_SECTIONS = {
+    "en": ["## Project Introduction", "## Project Features", "## Getting Started", "## Project Structure"],
+    "zh-Hans": ["## 项目简介", "## 项目特性", "## 快速开始", "## 项目结构"],
+}
 SIGNATURES = ("Co-" + "Authored-By", "Generated " + "with", "Generated " + "by", "AI-" + "generated")
 
 
@@ -74,7 +78,7 @@ def check_links(path, text):
     return errors
 
 
-def check_tree(block, slug):
+def check_tree(block, slug, root=None):
     errors, entries, groups, parents = [], [], {}, []
     lines = block.splitlines()
     if not lines or lines[0] != slug.split("/")[-1] + "/":
@@ -97,11 +101,13 @@ def check_tree(block, slug):
         base = clean.rsplit("/", 1)[-1]
         if base.startswith(("README", "LICENSE")) or base in {
             ".git", ".gitignore", ".gitattributes", ".gitmodules",
-            ".agents", ".claude", "AGENTS.md", "CLAUDE.md",
+            ".agents", ".claude", ".codex", ".cursor", "AGENTS.md", "CLAUDE.md", "GEMINI.md",
         }:
             errors.append("project-tree-common: omit common repository metadata")
         if not clean.isascii():
             errors.append("project-tree-filename: use English ASCII names")
+        if root is not None and not root.joinpath(*parents, clean).exists():
+            errors.append(f"project-tree-path: listed path does not exist: {'/'.join([*parents, clean])}")
         is_dir = name.split(" -> ", 1)[0].endswith("/")
         groups.setdefault(tuple(parents), []).append((not is_dir, name.casefold()))
         if is_dir:
@@ -207,8 +213,24 @@ def check_readme(path, slug, display_name=None, root=None):
             if end == len(lines):
                 errors.append("project-tree-fence: unclosed tree fence")
             else:
-                errors.extend(check_tree("\n".join(lines[start + 1:end]), slug))
+                errors.extend(check_tree("\n".join(lines[start + 1:end]), slug, root))
     sections = [(index, line) for index, line in outside if line.startswith("## ")]
+    expected = CORE_SECTIONS["zh-Hans" if chinese else "en"]
+    headings = [line for _, line in sections]
+    for heading in expected:
+        if headings.count(heading) != 1:
+            errors.append(f"readme-section-name: require exactly one {heading}")
+    if headings[:len(expected)] != expected:
+        errors.append("readme-section-order: use the template's exact core headings and order")
+    if headings.count(expected[1]) == 1:
+        feature_index = headings.index(expected[1])
+        start = sections[feature_index][0] + 1
+        end = sections[feature_index + 1][0] if feature_index + 1 < len(sections) else len(lines)
+        paragraphs = re.split(r"\n\s*\n", "\n".join(lines[start:end]).strip())
+        feature_start = r"^[^\x00-\x7f]+ \*\*[^*\n]+\*\* — \S"
+        for paragraph in paragraphs:
+            if not re.match(feature_start, paragraph) or len(re.findall(feature_start, paragraph, re.M)) != 1:
+                errors.append("readme-feature-format: use separate emoji + bold label — explanation paragraphs")
     license_heading = "## 许可协议" if chinese else "## License"
     if not sections or sections[-1][1] != license_heading:
         errors.append("license-section: finish with a license section")
@@ -323,7 +345,7 @@ def check_github(root, slug):
     if identity.exists():
         try:
             expected = json.loads(identity.read_text())
-            for key, actual in (("description", description), ("topics", topics)):
+            for key, actual in (("description", description), ("topics", topics), ("homepage", homepage)):
                 if key in expected and (sorted(expected[key]) if key == "topics" else expected[key]) != (sorted(actual) if key == "topics" else actual):
                     errors.append(f"repository.json: github-{key}: local and live metadata differ")
         except (ValueError, TypeError):

@@ -83,12 +83,20 @@ template; replace that content with the new project's actual behavior.
 2. Include last commit, top language, repository size, and license badges using the actual slug.
    Add CI, formatter, coverage, or release badges when the capability exists. CI badges must name
    a real workflow and branch. Never present an unpublished repository as having live checks.
-3. Follow introduction → features → quick start → project structure → relevant extras → license.
-   Start with one concrete sentence explaining the project. Features use an emoji, bold short
-   label, and one explanation. Keep prose factual; omit marketing adjectives and requests for stars.
+3. Keep the exact core H2 names and order from the examples:
+   - English: `Project Introduction`, `Project Features`, `Getting Started`, `Project Structure`.
+   - Simplified Chinese: `项目简介`, `项目特性`, `快速开始`, `项目结构`.
+     Relevant extra sections follow the structure; `License` / `许可协议` is always last. Do not shorten
+     core headings to aliases such as `Introduction`, `Features`, or `特性`.
+     Start with one concrete sentence explaining the project. Each feature is a separate paragraph,
+     not a bulleted list: emoji, space, **short label**, `—`, explanation. Separate features with a
+     blank line. English feature labels use Title Case, preserving exact brand names and identifiers.
+     Keep prose factual; omit marketing adjectives and requests for stars.
 4. Provide copyable `bash` setup commands. List only useful project-specific paths in a `bash`
    structure tree rooted at the actual repository name. Omit README, LICENSE, Git metadata, and
-   Agent configuration. At every level, directories precede files; sort each group by name.
+   Agent configuration such as `AGENTS.md`, `CLAUDE.md`, `.agents/`, and `.codex/`. A packaged Skill's
+   `SKILL.md` is its primary product entry, not generic repository configuration, and may be included.
+   All listed paths must exist. At every level, directories precede files; sort each group by name.
    Every entry has a useful end-of-line comment. Let `w` be the longest entry before padding,
    including tree connectors and indentation, counted in Unicode characters rather than bytes.
    Every `#` must have exactly `max(w+1,36)` characters before it: normally 36, with at least one
@@ -99,7 +107,10 @@ template; replace that content with the new project's actual behavior.
 
    中文：本项目代码采用 [MIT 许可协议](https://github.com/lailai0916/tools/blob/main/LICENSE)。
 
-   Document additional content licenses and genuine source attribution in that same section.
+   Document additional content licenses and required source attribution concisely in that section.
+   Do not append template-use credits or scaffolding history merely because the project was created
+   from this template. Preserve actual copyright notices and imported material's license obligations;
+   detailed provenance belongs beside the material, not in repetitive README boilerplate.
 
 ## Validation
 
