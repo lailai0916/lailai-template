@@ -11,7 +11,14 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 TEMPLATE = "lailai0916/lailai-template"
 STANDARD_URL = f"https://github.com/{TEMPLATE}/blob/main/SETUP.md"
-MIT_URL = "https://github.com/lailai0916/tools/blob/main/LICENSE"
+MIT_CODE_SENTENCE = {
+    "en": "This project's code is licensed under MIT License.",
+    "zh-Hans": "本项目代码采用 MIT 许可协议。",
+}
+CC_BY_4_CONTENT_SENTENCE = {
+    "en": "This project's code is licensed under MIT License, and this website's content is licensed under CC BY 4.0.",
+    "zh-Hans": "本项目代码采用 MIT 许可协议，网站内容采用 CC BY 4.0 许可协议。",
+}
 TREE_ENTRY = re.compile(r"^(?P<prefix>(?:│   |    )*)(?:├── |└── )(?P<name>.+)$")
 KEBAB = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 COMMIT = re.compile(r"^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([^)]+\))?!?: .+")
@@ -243,10 +250,11 @@ def check_readme(path, slug, display_name=None, root=None):
     else:
         license_text = "\n".join(lines[sections[-1][0] + 1:])
         if "MIT" in license_text:
-            exact = f"本项目代码采用 [MIT 许可协议]({MIT_URL})。" if chinese else f"This project's code is licensed under [MIT License]({MIT_URL})."
-            if MIT_URL not in license_text:
-                errors.append("license-link: use the canonical MIT link")
-            if exact not in license_text:
+            language = "zh-Hans" if chinese else "en"
+            if "CC BY 4.0" in license_text:
+                if CC_BY_4_CONTENT_SENTENCE[language] not in license_text:
+                    errors.append("license-content-wording: use the standard CC BY 4.0 content sentence")
+            elif MIT_CODE_SENTENCE[language] not in license_text:
                 errors.append("license-wording: use the standard MIT sentence")
     return [error if error.startswith(path.name + ":") else f"{path.name}: {error}" for error in errors]
 

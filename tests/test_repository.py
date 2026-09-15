@@ -121,14 +121,32 @@ class RepositoryTest(unittest.TestCase):
             ("github/last-commit/example/csv-diff", "github/last-commit/wrong/repo", "readme-required-badges"),
             ("csv-diff/ci.yml?", "csv-diff/missing.yml?", "readme-ci-badge"),
             ("```bash\ncsv-diff/", "```text\ncsv-diff/", "project-tree-language"),
-            (checker.MIT_URL, "LICENSE", "license-link"),
-            ("This project's code is licensed under", "Licensed under", "license-wording"),
+            ("This project's code is licensed under MIT License.", "Licensed under MIT License.", "license-wording"),
         )
         for before, after, code in cases:
             with self.subTest(code=code):
                 self.assertTrue(any(code in error for error in self.readme(good.replace(before, after))))
         self.assertTrue(any("project-tree-missing" in error for error in self.readme(good.replace("## Project Structure", "## Other"))))
         self.assertEqual(self.readme(good.replace("<p><strong>", "<p>\n<strong>")), [])
+
+    def test_text_content_license_wording(self):
+        for filename, ordinary, combined in (
+            ("README.md", checker.MIT_CODE_SENTENCE["en"], checker.CC_BY_4_CONTENT_SENTENCE["en"]),
+            ("README.zh-Hans.md", checker.MIT_CODE_SENTENCE["zh-Hans"], checker.CC_BY_4_CONTENT_SENTENCE["zh-Hans"]),
+        ):
+            path = self.root / filename
+            original = path.read_text()
+            website = original.replace(ordinary, combined)
+            path.write_text(website)
+            with self.subTest(filename=filename):
+                self.assertEqual(checker.check_readme(path, "example/csv-diff", root=self.root), [])
+                if filename == "README.md":
+                    invalid = website.replace("website's content is licensed under", "website content is licensed under")
+                else:
+                    invalid = website.replace("网站内容采用", "网站内容使用")
+                path.write_text(invalid)
+                self.assertTrue(any("license-content-wording" in error for error in checker.check_readme(path, "example/csv-diff", root=self.root)))
+            path.write_text(original)
 
     def test_exact_section_names_and_order(self):
         for filename, cases in (

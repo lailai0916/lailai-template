@@ -53,8 +53,9 @@ because it originally came from the template. Git retains removed tracked initia
 - Keep `.gitignore` and `.gitattributes`, adapting the supplied dependency/build/editor exclusions
   to the stack. Text uses UTF-8, LF, and a final newline; Windows-native scripts may require CRLF.
 - Open-source code defaults to MIT unless a license or explicit requirement dictates otherwise.
-  Keep `LICENSE` in each repository. Personal non-code creations default to CC BY-NC-SA; preserve
-  the applicable license and attribution of imported material, including mixed-license projects.
+  Keep `LICENSE` in each repository. Projects with substantial original text or website content
+  default that content to CC BY 4.0 as a separate content license; preserve the applicable license
+  and attribution of imported material, including mixed-license projects.
 - Use Prettier for supported text files in every new project, including documentation-only repos:
   a development dependency, lockfile, configuration, `format`, and `format:check` scripts.
   Defaults are `printWidth: 100`, `singleQuote: true`, and `trailingComma: "es5"`.
@@ -106,11 +107,20 @@ template; replace that content with the new project's actual behavior.
    including tree connectors and indentation, counted in Unicode characters rather than bytes.
    Every `#` must have exactly `max(w+1,36)` characters before it: normally 36, with at least one
    separating space for longer paths. All entries in one tree share the same comment column.
-5. Finish with a license section. For MIT code, use the matching sentence exactly:
+5. Finish with a license section. Code defaults to MIT. Projects with substantial original text or
+   website content default that content to CC BY 4.0 as a separate content license. For ordinary
+   MIT code, use the matching sentence exactly:
 
-   English: This project's code is licensed under [MIT License](https://github.com/lailai0916/tools/blob/main/LICENSE).
+   English: This project's code is licensed under MIT License.
 
-   中文：本项目代码采用 [MIT 许可协议](https://github.com/lailai0916/tools/blob/main/LICENSE)。
+   中文：本项目代码采用 MIT 许可协议。
+
+   For a website or other text-heavy repository with substantial original content, use the separate
+   content-license wording when applicable:
+
+   English: This project's code is licensed under MIT License, and this website's content is licensed under CC BY 4.0.
+
+   中文：本项目代码采用 MIT 许可协议，网站内容采用 CC BY 4.0 许可协议。
 
    Document additional content licenses and required source attribution concisely in that section.
    Do not append template-use credits or scaffolding history merely because the project was created

@@ -71,4 +71,4 @@ npm run format:check
 
 ## License
 
-This project's code is licensed under [MIT License](https://github.com/lailai0916/tools/blob/main/LICENSE).
+This project's code is licensed under MIT License.

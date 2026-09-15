@@ -63,4 +63,4 @@ npm run format:check
 
 ## 许可协议
 
-本项目代码采用 [MIT 许可协议](https://github.com/lailai0916/tools/blob/main/LICENSE)。
+本项目代码采用 MIT 许可协议。

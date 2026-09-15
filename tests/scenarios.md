@@ -23,6 +23,11 @@ Given a repository whose primary deliverable is a website, accept `Website Intro
 `Website Features` in English, with `网站简介` and `网站特性` in Simplified Chinese. Keep
 `Getting Started` / `快速开始` and `Project Structure` / `项目结构` in the same core order.
 
+## Text-heavy content license
+
+Given a repository with substantial original website or text content, keep the code under MIT
+License and state the separate content license as CC BY 4.0 in the final license section.
+
 ## Existing local conventions
 
 Maintain a project with an established non-English default locale and a different formatter.
