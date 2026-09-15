@@ -40,6 +40,7 @@ class RepositoryTest(unittest.TestCase):
         (self.root / "scripts").mkdir()
         (self.root / "tests").mkdir()
         (self.root / "start.py").write_text("print('CSV Diff')\n")
+        (self.root / "LICENSE-docs").write_text("CC BY 4.0\n")
 
     def readme(self, text):
         path = self.root / "README.md"
@@ -121,7 +122,8 @@ class RepositoryTest(unittest.TestCase):
             ("github/last-commit/example/csv-diff", "github/last-commit/wrong/repo", "readme-required-badges"),
             ("csv-diff/ci.yml?", "csv-diff/missing.yml?", "readme-ci-badge"),
             ("```bash\ncsv-diff/", "```text\ncsv-diff/", "project-tree-language"),
-            ("This project's code is licensed under MIT License.", "Licensed under MIT License.", "license-wording"),
+            ("[MIT License](LICENSE)", "MIT License", "license-link"),
+            ("This project's code is licensed under [MIT License](LICENSE).", "Licensed under [MIT License](LICENSE).", "license-wording"),
         )
         for before, after, code in cases:
             with self.subTest(code=code):
@@ -140,12 +142,12 @@ class RepositoryTest(unittest.TestCase):
             path.write_text(website)
             with self.subTest(filename=filename):
                 self.assertEqual(checker.check_readme(path, "example/csv-diff", root=self.root), [])
-                if filename == "README.md":
-                    invalid = website.replace("website's content is licensed under", "website content is licensed under")
-                else:
-                    invalid = website.replace("网站内容采用", "网站内容使用")
+                invalid = website.replace(
+                    "[CC BY 4.0](LICENSE-docs)" if filename == "README.md" else "[CC BY 4.0 许可协议](LICENSE-docs)",
+                    "CC BY 4.0",
+                )
                 path.write_text(invalid)
-                self.assertTrue(any("license-content-wording" in error for error in checker.check_readme(path, "example/csv-diff", root=self.root)))
+                self.assertTrue(any("license-content-link" in error for error in checker.check_readme(path, "example/csv-diff", root=self.root)))
             path.write_text(original)
 
     def test_exact_section_names_and_order(self):

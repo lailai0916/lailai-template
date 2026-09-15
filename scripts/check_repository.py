@@ -12,13 +12,18 @@ from urllib.parse import parse_qs, unquote, urlparse
 TEMPLATE = "lailai0916/lailai-template"
 STANDARD_URL = f"https://github.com/{TEMPLATE}/blob/main/SETUP.md"
 MIT_CODE_SENTENCE = {
-    "en": "This project's code is licensed under MIT License.",
-    "zh-Hans": "本项目代码采用 MIT 许可协议。",
+    "en": "This project's code is licensed under [MIT License](LICENSE).",
+    "zh-Hans": "本项目代码采用 [MIT 许可协议](LICENSE)。",
+}
+MIT_CODE_PATTERN = {
+    "en": re.compile(r"This project's code is licensed under \[MIT License\]\([^\s)]+\)(?:\.|,)"),
+    "zh-Hans": re.compile(r"本项目代码采用 \[MIT 许可协议\]\([^\s)]+\)(?:。|，)"),
 }
 CC_BY_4_CONTENT_SENTENCE = {
-    "en": "This project's code is licensed under MIT License, and this website's content is licensed under CC BY 4.0.",
-    "zh-Hans": "本项目代码采用 MIT 许可协议，网站内容采用 CC BY 4.0 许可协议。",
+    "en": "This project's code is licensed under [MIT License](LICENSE), and this website's content is licensed under [CC BY 4.0](LICENSE-docs).",
+    "zh-Hans": "本项目代码采用 [MIT 许可协议](LICENSE)，网站内容采用 [CC BY 4.0 许可协议](LICENSE-docs)。",
 }
+CC_BY_4_LINK_PATTERN = re.compile(r"\[(?:CC BY 4\.0(?: 许可协议)?|知识共享 署名 4\.0 国际许可协议)\]\([^\s)]+\)")
 TREE_ENTRY = re.compile(r"^(?P<prefix>(?:│   |    )*)(?:├── |└── )(?P<name>.+)$")
 KEBAB = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 COMMIT = re.compile(r"^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|revert)(\([^)]+\))?!?: .+")
@@ -251,11 +256,13 @@ def check_readme(path, slug, display_name=None, root=None):
         license_text = "\n".join(lines[sections[-1][0] + 1:])
         if "MIT" in license_text:
             language = "zh-Hans" if chinese else "en"
-            if "CC BY 4.0" in license_text:
-                if CC_BY_4_CONTENT_SENTENCE[language] not in license_text:
-                    errors.append("license-content-wording: use the standard CC BY 4.0 content sentence")
-            elif MIT_CODE_SENTENCE[language] not in license_text:
+            if not re.search(r"\[MIT (?:License|许可协议)\]\([^\s)]+\)", license_text):
+                errors.append("license-link: link the code license name")
+            if not MIT_CODE_PATTERN[language].search(license_text):
                 errors.append("license-wording: use the standard MIT sentence")
+            if "CC BY 4.0" in license_text or "知识共享 署名 4.0" in license_text:
+                if not CC_BY_4_LINK_PATTERN.search(license_text):
+                    errors.append("license-content-link: link the content license name")
     return [error if error.startswith(path.name + ":") else f"{path.name}: {error}" for error in errors]
 
 

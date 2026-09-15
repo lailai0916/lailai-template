@@ -111,16 +111,16 @@ template; replace that content with the new project's actual behavior.
    website content default that content to CC BY 4.0 as a separate content license. For ordinary
    MIT code, use the matching sentence exactly:
 
-   English: This project's code is licensed under MIT License.
+   English: This project's code is licensed under [MIT License](LICENSE).
 
-   中文：本项目代码采用 MIT 许可协议。
+   中文：本项目代码采用 [MIT 许可协议](LICENSE)。
 
    For a website or other text-heavy repository with substantial original content, use the separate
    content-license wording when applicable:
 
-   English: This project's code is licensed under MIT License, and this website's content is licensed under CC BY 4.0.
+   English: This project's code is licensed under [MIT License](LICENSE), and this website's content is licensed under [CC BY 4.0](LICENSE-docs).
 
-   中文：本项目代码采用 MIT 许可协议，网站内容采用 CC BY 4.0 许可协议。
+   中文：本项目代码采用 [MIT 许可协议](LICENSE)，网站内容采用 [CC BY 4.0 许可协议](LICENSE-docs)。
 
    Document additional content licenses and required source attribution concisely in that section.
    Do not append template-use credits or scaffolding history merely because the project was created

@@ -63,4 +63,4 @@ npm run format:check
 
 ## 许可协议
 
-本项目代码采用 MIT 许可协议。
+本项目代码采用 [MIT 许可协议](LICENSE)。

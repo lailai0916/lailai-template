@@ -71,4 +71,4 @@ npm run format:check
 
 ## License
 
-This project's code is licensed under MIT License.
+This project's code is licensed under [MIT License](LICENSE).

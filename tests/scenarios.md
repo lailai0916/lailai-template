@@ -26,7 +26,8 @@ Given a repository whose primary deliverable is a website, accept `Website Intro
 ## Text-heavy content license
 
 Given a repository with substantial original website or text content, keep the code under MIT
-License and state the separate content license as CC BY 4.0 in the final license section.
+License with a link to the code license and state the separate content license as linked CC BY 4.0
+in the final license section.
 
 ## Existing local conventions
 
