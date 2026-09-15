@@ -20,6 +20,10 @@ CORE_SECTIONS = {
     "en": ["## Project Introduction", "## Project Features", "## Getting Started", "## Project Structure"],
     "zh-Hans": ["## 项目简介", "## 项目特性", "## 快速开始", "## 项目结构"],
 }
+WEBSITE_CORE_SECTIONS = {
+    "en": ["## Website Introduction", "## Website Features", "## Getting Started", "## Project Structure"],
+    "zh-Hans": ["## 网站简介", "## 网站特性", "## 快速开始", "## 项目结构"],
+}
 SIGNATURES = ("Co-" + "Authored-By", "Generated " + "with", "Generated " + "by", "AI-" + "generated")
 
 
@@ -215,8 +219,10 @@ def check_readme(path, slug, display_name=None, root=None):
             else:
                 errors.extend(check_tree("\n".join(lines[start + 1:end]), slug, root))
     sections = [(index, line) for index, line in outside if line.startswith("## ")]
-    expected = CORE_SECTIONS["zh-Hans" if chinese else "en"]
     headings = [line for _, line in sections]
+    language = "zh-Hans" if chinese else "en"
+    website_headings = WEBSITE_CORE_SECTIONS[language]
+    expected = website_headings if headings and headings[0] == website_headings[0] else CORE_SECTIONS[language]
     for heading in expected:
         if headings.count(heading) != 1:
             errors.append(f"readme-section-name: require exactly one {heading}")

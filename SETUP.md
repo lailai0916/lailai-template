@@ -84,10 +84,15 @@ template; replace that content with the new project's actual behavior.
    Add CI, formatter, coverage, or release badges when the capability exists. CI badges must name
    a real workflow and branch. Never present an unpublished repository as having live checks.
 3. Keep the exact core H2 names and order from the examples:
-   - English: `Project Introduction`, `Project Features`, `Getting Started`, `Project Structure`.
-   - Simplified Chinese: `项目简介`, `项目特性`, `快速开始`, `项目结构`.
-     Relevant extra sections follow the structure; `License` / `许可协议` is always last. Do not shorten
-     core headings to aliases such as `Introduction`, `Features`, or `特性`.
+   - English project README: `Project Introduction`, `Project Features`, `Getting Started`,
+     `Project Structure`.
+   - English website README: `Website Introduction`, `Website Features`, `Getting Started`,
+     `Project Structure`.
+   - Simplified Chinese project README: `项目简介`, `项目特性`, `快速开始`, `项目结构`.
+   - Simplified Chinese website README: `网站简介`, `网站特性`, `快速开始`, `项目结构`.
+     Use the website variant when the repository's primary deliverable is a website. Relevant extra
+     sections follow the structure; `License` / `许可协议` is always last. Do not shorten core
+     headings to aliases such as `Introduction`, `Features`, or `特性`.
      Start with one concrete sentence explaining the project. Each feature is a separate paragraph,
      not a bulleted list: emoji, space, **short label**, `—`, explanation. Separate features with a
      blank line. English feature labels use Title Case, preserving exact brand names and identifiers.

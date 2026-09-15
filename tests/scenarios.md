@@ -17,6 +17,12 @@ guide. Preserve the guide in the template source, project-specific tests, config
 upstream link in `AGENTS.md`. Repair CI and local references before deleting template-only files.
 On a later README change, follow the retained route without restoring a copied rule manual.
 
+## Website README variant
+
+Given a repository whose primary deliverable is a website, accept `Website Introduction` and
+`Website Features` in English, with `网站简介` and `网站特性` in Simplified Chinese. Keep
+`Getting Started` / `快速开始` and `Project Structure` / `项目结构` in the same core order.
+
 ## Existing local conventions
 
 Maintain a project with an established non-English default locale and a different formatter.

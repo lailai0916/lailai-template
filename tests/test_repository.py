@@ -153,6 +153,21 @@ class RepositoryTest(unittest.TestCase):
         duplicate = good.replace("## Project Introduction", "## Project Introduction\n\n## Project Introduction")
         self.assertTrue(any("readme-section-name" in error for error in self.readme(duplicate)))
 
+    def test_website_section_names_and_order(self):
+        for filename, replacements in (
+            ("README.md", (("Project Introduction", "Website Introduction"),
+                           ("Project Features", "Website Features"))),
+            ("README.zh-Hans.md", (("项目简介", "网站简介"), ("项目特性", "网站特性"))),
+        ):
+            path = self.root / filename
+            original = path.read_text()
+            website = original
+            for before, after in replacements:
+                website = website.replace("## " + before, "## " + after)
+            path.write_text(website)
+            self.assertEqual(checker.check_readme(path, "example/csv-diff", root=self.root), [])
+            path.write_text(original)
+
     def test_feature_paragraph_format(self):
         good = (self.root / "README.md").read_text()
         for before, after in (("📄 **Shared Standards** —", "- 📄 **Shared Standards** —"),
