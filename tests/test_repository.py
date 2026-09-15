@@ -130,6 +130,11 @@ class RepositoryTest(unittest.TestCase):
                 self.assertTrue(any(code in error for error in self.readme(good.replace(before, after))))
         self.assertTrue(any("project-tree-missing" in error for error in self.readme(good.replace("## Project Structure", "## Other"))))
         self.assertEqual(self.readme(good.replace("<p><strong>", "<p>\n<strong>")), [])
+        static_license = good.replace(
+            "github/license/example/csv-diff",
+            "badge/license-MIT-blue",
+        )
+        self.assertEqual(self.readme(static_license), [])
 
     def test_text_content_license_wording(self):
         for filename, ordinary, combined in (

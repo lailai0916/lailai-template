@@ -179,7 +179,13 @@ def check_readme(path, slug, display_name=None, root=None):
     sources += re.findall(r"!\[[^\]]*\]\(([^)]+)\)", head)
     parsed = [urlparse(source.replace("&amp;", "&")) for source in sources]
     for kind in ("last-commit", "languages/top", "repo-size", "license"):
-        if not any(url.netloc == "img.shields.io" and url.path == f"/github/{kind}/{slug}" for url in parsed):
+        valid = any(url.netloc == "img.shields.io" and url.path == f"/github/{kind}/{slug}" for url in parsed)
+        if kind == "license":
+            valid = valid or any(
+                url.netloc == "img.shields.io" and url.path.startswith("/badge/license-")
+                for url in parsed
+            )
+        if not valid:
             errors.append(f"readme-required-badges: missing actual {kind} badge for {slug}")
     if root:
         workflows = list((root / ".github/workflows").glob("*.yml"))
